@@ -115,13 +115,13 @@ void flat_stable_sort <Iter_t, Compare, Power2>
 {
     size_t nblock = size_t(itx_last - itx_first);
     if (nblock < 5)
-    {   sort_small(itx_first, itx_last);
+    {
+        sort_small(itx_first, itx_last);
         return;
     };
-    if ( nblock > 7)
-    {   if (is_sorted_forward(itx_first, itx_last)) return;
-        if (is_sorted_backward(itx_first, itx_last)) return;
-    };
+    if (is_sorted_forward(itx_first, itx_last)) return;
+    if (is_sorted_backward(itx_first, itx_last)) return;
+
     size_t nblock1 = (nblock + 1) >> 1;
     divide(itx_first, itx_first + nblock1);
     divide(itx_first + nblock1, itx_last);
@@ -177,34 +177,44 @@ bool flat_stable_sort <Iter_t, Compare, Power2>
 ::is_sorted_forward(it_index itx_first, it_index itx_last)
 {
     size_t nblock = size_t(itx_last - itx_first);
+    size_t mask = ~(BLOCK_SIZE - 1);
     range_it rng = get_group_range(*itx_first, nblock);
     size_t nelem = rng.size();
-    size_t min_process = std::max(BLOCK_SIZE, (nelem >> 3));
+    size_t min_process = std::max(BLOCK_SIZE, (nelem >> 2));
 
-    size_t nsorted1 = bsc::number_stable_sorted_forward (rng.first, rng.last,
-                                                         min_process, cmp);
-    if (nsorted1 == nelem) return true;
-    if (nsorted1 == 0) return false;
+    Iter_t itaux = bsc::is_stable_sorted_forward(rng.first, rng.last, cmp);
+    if (itaux == rng.last) return true;
 
-    size_t nsorted2 = nelem - nsorted1;
-    Iter_t itaux = rng.first + nsorted1;
-    if (nsorted2 <= (BLOCK_SIZE << 1))
+    size_t nsorted1 = size_t(itaux - rng.first);
+    if (nsorted1 == 1)
     {
-        flat_stable_sort(itaux, rng.last, cmp, ptr_circ);
-        bscu::insert_sorted(rng.first, itaux, rng.last, cmp,
-                            ptr_circ->get_buffer());
-    }
-    else
-    {   // Adjust the size of the sorted data to a number of blocks
-        size_t mask = ~(BLOCK_SIZE - 1);
+        itaux = bsc::is_reverse_stable_sorted_forward(rng.first, rng.last, cmp);
+        nsorted1 = size_t(itaux - rng.first);
+        if (nsorted1 >= min_process) bscu::reverse(rng.first, itaux);
+        if (itaux == rng.last) return true;
+    };
+    if (nsorted1 >= min_process)
+    {
+        size_t nsorted2 = nelem - nsorted1;
+
+        if (nsorted2 <= (BLOCK_SIZE << 1))
+        {
+            flat_stable_sort(itaux, rng.last, cmp, ptr_circ);
+            bscu::insert_sorted(rng.first, itaux, rng.last, cmp,
+                                ptr_circ->get_buffer());
+            return true;
+        };
+        // Adjust the size of the sorted data to a number of blocks
         size_t nsorted1_adjust = nsorted1 & mask;
         flat_stable_sort(rng.first + nsorted1_adjust, rng.last, cmp,
                          ptr_circ);
         size_t nblock1 = nsorted1_adjust >> Power2;
         merge_range_pos(itx_first, itx_first + nblock1, itx_last);
+        return true;
     };
-    return true;
+    return false;
 };
+
 //
 //------------------------------------------------------------------------
 //  function : is_sorted_backward
@@ -221,30 +231,40 @@ bool flat_stable_sort <Iter_t, Compare, Power2>
     range_it rng = get_group_range(*itx_first, nblock);
 
     size_t nelem = rng.size();
-    size_t min_process = std::max(BLOCK_SIZE, (nelem >> 3));
+    size_t min_process = std::max(BLOCK_SIZE, (nelem >> 2));
 
-    size_t nsorted2 = bsc::number_stable_sorted_backward(rng.first, rng.last,
-                                                         min_process, cmp);
-    if (nsorted2 == nelem) return true;
-    if (nsorted2 == 0 ) return false;
-    Iter_t itaux = rng.last - nsorted2;
-    size_t nsorted1 = nelem - nsorted2;
+    Iter_t itaux = bsc::is_stable_sorted_backward(rng.first, rng.last, cmp);
+    if (itaux == rng.first) return true;
 
-    if (nsorted1 <= (BLOCK_SIZE << 1))
+    size_t nsorted2 = size_t(rng.last - itaux);
+    if (nsorted2 == 1)
     {
-        flat_stable_sort(rng.first, itaux, cmp, ptr_circ);
-        bscu::insert_sorted_backward(rng.first, itaux, rng.last, cmp,
-                                     ptr_circ->get_buffer());
-    }
-    else
-    {   // Adjust the size of nsorted2 for to be a number of blocks
+        itaux = bsc::is_reverse_stable_sorted_backward (rng.first, rng.last,
+                                                        cmp);
+        nsorted2 = size_t(rng.last - itaux);
+        if (nsorted2 >= min_process) bscu::reverse(itaux, rng.last);
+        if (itaux == rng.first) return true;
+    };
+    size_t nsorted1 = nelem - nsorted2;
+    if (nsorted2 >= min_process)
+    {
+        if (nsorted1 <= (BLOCK_SIZE << 1))
+        {
+            flat_stable_sort(rng.first, itaux, cmp, ptr_circ);
+            bscu::insert_sorted_backward(rng.first, itaux, rng.last, cmp,
+                                         ptr_circ->get_buffer());
+            return true;
+        };
+
+        // Adjust the size of nsorted2 for to be a number of blocks
         size_t nblock1 = (nsorted1 + BLOCK_SIZE - 1) >> Power2;
         size_t nsorted1_adjust = (nblock1 << Power2);
         flat_stable_sort(rng.first, rng.first + nsorted1_adjust, cmp,
                          ptr_circ);
         merge_range_pos(itx_first, itx_first + nblock1, itx_last);
+        return true;
     };
-    return true;
+    return false;
 };
 //****************************************************************************
 };// End namespace flat_internal

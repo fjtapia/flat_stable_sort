@@ -6,9 +6,9 @@
 <h3>DESCRIPTION</h3>
 
 
-This algorithm had been invented and implemented for the Boost library by the author.
+This algorithm had been invented and implemented for the Boost library by the author. It is a stable sort algorithm with a best case O(N), and average and worst case O(NlogN).
 
-The goal of the algorithm is provide a stable sort with a low additional memory.The algorithms provided by the compilers and libraries use an additional memory, usually of a half of the data to sort. This algorithm need an additional memory of 8K.
+The goal of the algorithm is provide a stable sort with a low additional memory (about 1% of the memory used by the data).The algorithms provided by the compilers and libraries use an additional memory, usually of a half of the data to sort. This algorithm need an additional memory of 8K.
 
 The stable sorting algorithms without additional memory are very slow compared with the algorithms with additional memory. Due this, it's very rare to find implementations outside the research environments.
 
@@ -25,50 +25,52 @@ All the algorithms of the benchmark use comparison object, except spreadsort, wh
 These two tables show the results with numbers. The results with objects and strings are similar. In the folder  result, you can see the results obtained  with numbers, strings and objects of different sizes, compared with the others algorithms in Linux with GCC. 6.0.
 
 
-Different compilers can provide different results, due, mainly of the quality of the optimization of the compilers.                   
+Different compilers can provide different results, due, mainly of the quality of the optimization of the compilers.
 
 
-                       B O O S T      S O R T                   
-                      S I N G L E    T H R E A D               
-                  I N T E G E R    B E N C H M A R K                                                                   
+                       B O O S T      S O R T
+                      S I N G L E    T H R E A D
+                  I N T E G E R    B E N C H M A R K
                 SORT OF 100 000 000 NUMBERS OF 64 BITS
-                
-        [ 1 ] std::sort   [ 2 ] pdqsort          [ 3 ] std::stable_sort
-        [ 4 ] spin_sort   [ 5 ] flat_stable_sort [ 6 ] timsort
-        [ 7 ] spreadsort
-                            |      |      |      |      |      |      |      |
-                            | [ 1 ]| [ 2 ]| [ 3 ]| [ 4 ]| [ 5 ]| [ 6 ]| [ 7 ]|
-        --------------------+------+------+------+------+------+------+------+
-        random              | 8.20 | 3.90 | 8.51 | 9.45 |10.78 |13.13 | 4.22 |
-                            |      |      |      |      |      |      |      |
-        sorted              | 1.91 | 0.12 | 4.86 | 0.06 | 0.07 | 0.07 | 0.06 |
-        sorted + 0.1% end   | 6.50 | 2.86 | 4.89 | 0.41 | 0.36 | 0.20 | 3.14 |
-        sorted +   1% end   |14.02 | 3.35 | 4.96 | 0.55 | 0.49 | 0.34 | 3.62 |
-        sorted +  10% end   | 6.78 | 4.10 | 5.71 | 1.31 | 1.39 | 1.41 | 4.31 |
-                            |      |      |      |      |      |      |      |
-        sorted + 0.1% mid   | 4.56 | 3.22 | 6.51 | 1.85 | 2.47 | 2.48 | 3.22 |
-        sorted +   1% mid   | 4.61 | 3.57 | 7.03 | 2.07 | 3.06 | 3.28 | 3.77 |
-        sorted +  10% mid   | 6.48 | 4.64 | 9.42 | 3.92 | 5.46 | 7.12 | 4.93 |
-                            |      |      |      |      |      |      |      |
-        reverse sorted      | 1.37 | 0.26 | 5.10 | 0.13 | 0.14 | 0.13 | 1.77 |
-        rv sorted + 0.1% end| 7.64 | 2.89 | 5.21 | 0.52 | 0.41 | 0.26 | 2.79 |
-        rv sorted +   1% end| 5.16 | 3.27 | 5.27 | 0.65 | 0.55 | 0.41 | 3.40 |
-        rv sorted +  10% end| 4.78 | 4.11 | 6.01 | 1.43 | 1.46 | 1.48 | 4.31 |
-                            |      |      |      |      |      |      |      |
-        rv sorted + 0.1% mid| 4.53 | 3.22 | 6.51 | 1.85 | 2.46 | 2.47 | 3.22 |
-        rv sorted +   1% mid| 4.61 | 3.57 | 7.03 | 2.07 | 3.16 | 3.28 | 3.76 |
-        rv sorted +  10% mid| 6.47 | 4.64 | 9.42 | 3.92 | 5.46 | 7.12 | 4.93 |
-        --------------------+------+------+------+------+------+------+------+
+
+
+            [ 1 ] std::stable_sort   [ 2 ] spin_sort    [ 3 ] flat_stable_sort
+            [ 4 ] spreadsort
+                                |      |      |      |      |
+                                | [ 1 ]| [ 2 ]| [ 3 ]| [ 4 ]|
+            --------------------+------+------+------+------+
+            random              | 8.51 | 9.45 |10.78 | 4.22 |
+                                |      |      |      |      |
+            sorted              | 4.86 | 0.06 | 0.07 | 0.06 |
+            sorted + 0.1% end   | 4.89 | 0.41 | 0.36 | 3.14 |
+            sorted +   1% end   | 4.96 | 0.55 | 0.49 | 3.62 |
+            sorted +  10% end   | 5.71 | 1.31 | 1.39 | 4.31 |
+                                |      |      |      |      |
+            sorted + 0.1% mid   | 6.51 | 1.85 | 2.47 | 3.22 |
+            sorted +   1% mid   | 7.03 | 2.07 | 3.06 | 3.77 |
+            sorted +  10% mid   | 9.42 | 3.92 | 5.46 | 4.93 |
+                                |      |      |      |      |
+            reverse sorted      | 5.10 | 0.13 | 0.14 | 1.77 |
+            rv sorted + 0.1% end| 5.21 | 0.52 | 0.41 | 2.79 |
+            rv sorted +   1% end| 5.27 | 0.65 | 0.55 | 3.40 |
+            rv sorted +  10% end| 6.01 | 1.43 | 1.46 | 4.31 |
+                                |      |      |      |      |
+            rv sorted + 0.1% mid| 6.51 | 1.85 | 2.46 | 3.22 |
+            rv sorted +   1% mid| 7.03 | 2.07 | 3.16 | 3.76 |
+            rv sorted +  10% mid| 9.42 | 3.92 | 5.46 | 4.93 |
+            --------------------+------+------+------+------+
+
 
     Memory used by the stable sort algorithms
-    
-	    Algorithm 	      Memory used ( MB)
-	    ------------------------------------
-	    std::stable_sort 	1177
-	    spinsort 	        1175
-	    flat_stable_sort 	 788
-	    timsort 	        1173
-	    spreadsort 	         785
+
+            Algorithm         Memory used ( MB)
+            ------------------------------------
+            std::stable_sort    1177
+            spinsort            1175
+            flat_stable_sort     788
+            spreadsort           785
+
+
 
 
 The algorithms are **exception safe**, meaning that,  the exceptions generated by the algorithms guarantee the integrity of the objects to sort, but not their relative order. If the exception is generated inside the objects (in the move or in the copy constructor.. ) the results can be unpredictable.
