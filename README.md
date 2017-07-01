@@ -79,7 +79,6 @@ This library is **include only**. There is no need to link with any external sta
 
 <h2>Author and Copyright</h2>
 This library had been create to be integrated in the [Boost](http://www.boost.org) library
-It's pending of the final approval, due this can suffer some changes until the final version and definitive approval in the boost library.  You can find in  [https://github.com/fjtapia/sort_parallel](https://github.com/fjtapia/sort_parallel)
 
 
 Copyright 2017  [Francisco Tapia *(fjtapia@gmail.com)* ](mail:fjtapia@gmail.com)
